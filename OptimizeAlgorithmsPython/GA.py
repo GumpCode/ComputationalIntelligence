@@ -5,7 +5,7 @@
 # * Author        : Gump
 # * Email         : gumpglh@qq.com
 # * Create time   : 2016-05-14 23:19
-# * Last modified : 2016-05-16 00:51
+# * Last modified : 2016-05-19 17:11
 # * Filename      : GA.py
 # * Description   : class of Genetic Algorithm
 # * Copyright © Gump. All rights reserved.
@@ -16,14 +16,16 @@ import copy
 from Problem import CVRP
 
 class GA(object):
-    #def __init__(self, GeneLenght, PopulationCount,MurationRate, FitnessFun):
-    def __init__(self, GeneLenght, PopulationCount,MurationRate):
+    def __init__(self, GeneLenght, PopulationCount, CrossRate, MurationRate, DistanceMat, Requirement, Capacity):
         self.geneLenght = GeneLenght
         self.populationCount = PopulationCount
         self.population = []
+        self.crossRate = CrossRate
         self.murationRate = MurationRate
         self.mindistance=0.0
-
+        self.distanceMat = DistanceMat
+        self.requirement = Requirement
+        self.capacity = Capacity
         self.initPopulation()
 
     def initPopulation(self):
@@ -41,11 +43,12 @@ class GA(object):
         bestNum = 0
         for i in range(len(population)):
             cvrp = CVRP()
-            fitness, finalPath = cvrp.fitnessFun(population[i])
+            fitness, finalPath = cvrp.fitnessFun(population[i], self.distanceMat, self.requirement, self.capacity)
             if fitness > maxFit:
                 maxFit = fitness
                 self.mindistance = 1/fitness
                 bestNum = i
+                bestPath = copy.copy(finalPath)
             fitnessList.append(fitness)
             fitnessSum = fitness + fitnessSum
 
@@ -68,46 +71,50 @@ class GA(object):
                 selectNum2 = num
                 break
 
-        return selectNum1, selectNum2, bestNum, self.mindistance
+        return selectNum1, selectNum2, bestNum, self.mindistance, bestPath, fitness
 
     def cross(self, selectNum1, selectNum2):
-        index1 = random.randint(0, self.geneLenght -3)
-        index2 = random.randint(index1+1, self.geneLenght-1)
+        if random.randint(1, 1000)*0.001 > self.crossRate:
+            child1 = copy.copy(self.population[selectNum1])
+            child2 = copy.copy(self.population[selectNum2])
+        else:
+            index1 = random.randint(0, self.geneLenght -3)
+            index2 = random.randint(index1+1, self.geneLenght-1)
 
-        parent1 = copy.copy(self.population[selectNum1])
-        parent2 = copy.copy(self.population[selectNum2])
+            parent1 = copy.copy(self.population[selectNum1])
+            parent2 = copy.copy(self.population[selectNum2])
 
-        #cross
-        child1 = []
-        child2 = []
-        child1.extend(parent1[0:index1])
-        child1.extend(parent2[index1:index2])
-        child1.extend(parent1[index2:])
-        child2.extend(parent2[0:index1])
-        child2.extend(parent1[index1:index2])
-        child2.extend(parent2[index2:])
+            #cross
+            child1 = []
+            child2 = []
+            child1.extend(parent1[0:index1])
+            child1.extend(parent2[index1:index2])
+            child1.extend(parent1[index2:])
+            child2.extend(parent2[0:index1])
+            child2.extend(parent1[index1:index2])
+            child2.extend(parent2[index2:])
 
-        #exchange repeated elements
-        repeatList1 = []
-        repeatList2 = []
-        for i in range(0, index1):
-            for j in range(index1, index2):
-                if child1[i] == child1[j]:
-                    repeatList1.append(i)
-                if child2[i] == child2[j]:
-                    repeatList2.append(i)
+            #exchange repeated elements
+            repeatList1 = []
+            repeatList2 = []
+            for i in range(0, index1):
+                for j in range(index1, index2):
+                    if child1[i] == child1[j]:
+                        repeatList1.append(i)
+                    if child2[i] == child2[j]:
+                        repeatList2.append(i)
 
-        for i in range(index2, len(child2)):
-            for j in range(index1, index2):
-                if child1[i] == child1[j]:
-                    repeatList1.append(i)
-                if child2[i] == child2[j]:
-                    repeatList2.append(i)
+            for i in range(index2, len(child2)):
+                for j in range(index1, index2):
+                    if child1[i] == child1[j]:
+                        repeatList1.append(i)
+                    if child2[i] == child2[j]:
+                        repeatList2.append(i)
 
-        for num in range(len(repeatList1)):
-            temp = copy.copy(child1[repeatList1[num]])
-            child1[repeatList1[num]] = copy.copy(child2[repeatList2[num]])
-            child2[repeatList2[num]] = copy.copy(temp)
+            for num in range(len(repeatList1)):
+                temp = copy.copy(child1[repeatList1[num]])
+                child1[repeatList1[num]] = copy.copy(child2[repeatList2[num]])
+                child2[repeatList2[num]] = copy.copy(temp)
         return child1, child2
 
 
