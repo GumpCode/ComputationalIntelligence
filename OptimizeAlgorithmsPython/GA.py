@@ -53,8 +53,8 @@ class GA(object):
             fitnessSum = fitness + fitnessSum
 
         #select two gene
-        breakPoint1 = random.randint(1, 1000)* 0.001
-        breakPoint2 = random.randint(1, 1000)* 0.001
+        breakPoint1 = random.randint(1, 10000000)* 0.0000001
+        breakPoint2 = random.randint(1, 10000000)* 0.0000001
         selectNum1 = 0
         selectNum2 = 1
         fitPointList = []
@@ -113,8 +113,8 @@ class GA(object):
 
             for num in range(len(repeatList1)):
                 temp = copy.copy(child1[repeatList1[num]])
-                child1[repeatList1[num]] = copy.copy(child2[repeatList2[num]])
-                child2[repeatList2[num]] = copy.copy(temp)
+                child1[repeatList1[num]] = copy.copy(child2[(len(repeatList1)-1) - repeatList2[num]])
+                child2[(len(repeatList1)-1) - repeatList2[num]] = copy.copy(temp)
         return child1, child2
 
 

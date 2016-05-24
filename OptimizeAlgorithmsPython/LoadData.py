@@ -45,5 +45,5 @@ def LoadData(dirName):
     distance = [[0 for k in range(dimension)] for i in range(dimension)]
     for i in range(dimension):
         for j in range(dimension):
-            distance[i][j] = math.sqrt(math.pow((node_coord[i][0]-node_coord[j][0]),2)+math.pow((node_coord[i][1]-node_coord[j][1]),2))
+            distance[i][j] = int(math.sqrt(math.pow((node_coord[i][0]-node_coord[j][0]),2)+math.pow((node_coord[i][1]-node_coord[j][1]),2)))
     return name, dimension, capacity, distance, demand

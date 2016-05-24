@@ -20,16 +20,17 @@ import random
 import matplotlib.pyplot as plt
 
 
-def singleGA(populationCount, crossRate, murationRate, iteraNum):
+def singleGA(populationCount, crossRate, murationRate, iteraNum, filename):
     cvrp = CVRP()
-    name, dimension, capacity, CustomerDistance, Requirement = LoadData('A-n32-k5.vrp')
+    name, dimension, capacity, CustomerDistance, Requirement = LoadData(filename)
     ga = GA(GeneLenght=(dimension-1), PopulationCount=populationCount, CrossRate=crossRate, MurationRate=murationRate, DistanceMat=CustomerDistance, Requirement=Requirement, Capacity=capacity)
     ga.initPopulation()
     population = copy.copy(ga.population)
+    #population.append([21, 31, 19, 17, 13, 7, 26, 12, 1, 16, 30, 27, 24, 29, 18, 8, 9, 22, 15, 10, 25, 5, 20, 14, 28, 11, 4, 23, 3, 2, 6])
     bestGene = []
     minDistance = 100000
     minItera = 0
-    for itera in range(0,iteraNum):
+    for itera in range(iteraNum):
         newPopulation = []
         while True:
             selectNum1, selectNum2, bestNum, distance, bestPath, bestFit = ga.selectGene(population)
@@ -37,21 +38,21 @@ def singleGA(populationCount, crossRate, murationRate, iteraNum):
             newPopulation.extend(ga.muration([child1, child2]))
             if len(newPopulation) > populationCount:
                 newPopulation.append(population[bestNum])
-                selectNum1, selectNum2, newbestNum, distance1, bestPath, bestFit = ga.selectGene(newPopulation)
-                bestGene = copy.copy(newPopulation[newbestNum])
-                if distance1 < minDistance:
+                bestGene = copy.copy(population[bestNum])
+                if distance < minDistance:
                     minItera = itera
                     minDistance = distance
-                population = copy.copy(newPopulation)
+                    population = copy.copy(newPopulation)
                 break
+        print minItera, bestPath, minDistance, bestFit
     return minItera, bestPath, minDistance, bestFit
 
 
-def doubleGA(populationCount, crossRate, murationRate, iteraNum):
+def doubleGA(populationCount, crossRate1, murationRate1, crossRate2, murationRate2, iteraNum, filename):
     cvrp = CVRP()
-    name, dimension, capacity, CustomerDistance, Requirement = LoadData('A-n32-k5.vrp')
-    ga1 = GA(GeneLenght=(dimension-1), PopulationCount=populationCount, CrossRate=crossRate, MurationRate=murationRate, DistanceMat=CustomerDistance, Requirement=Requirement, Capacity=capacity)
-    ga2 = GA(GeneLenght=(dimension-1), PopulationCount=populationCount, CrossRate=crossRate, MurationRate=murationRate, DistanceMat=CustomerDistance, Requirement=Requirement, Capacity=capacity)
+    name, dimension, capacity, CustomerDistance, Requirement = LoadData(filename)
+    ga1 = GA(GeneLenght=(dimension-1), PopulationCount=populationCount, CrossRate=crossRate1, MurationRate=murationRate1, DistanceMat=CustomerDistance, Requirement=Requirement, Capacity=capacity)
+    ga2 = GA(GeneLenght=(dimension-1), PopulationCount=populationCount, CrossRate=crossRate2, MurationRate=murationRate2, DistanceMat=CustomerDistance, Requirement=Requirement, Capacity=capacity)
     ga1.initPopulation()
     ga2.initPopulation()
     population1 = copy.copy(ga1.population)
@@ -67,8 +68,9 @@ def doubleGA(populationCount, crossRate, murationRate, iteraNum):
             selectNum1, selectNum2, bestNum1, distance1, bestPath1, bestFit1 = ga1.selectGene(population1)
             child1, child2 = ga1.cross(selectNum1, selectNum2)
             newPopulation1.extend(ga1.muration([child1, child2]))
+
             selectNum1, selectNum2, bestNum2, distance2, bestPath2, bestFit2 = ga2.selectGene(population2)
-            child1, child2 = ga1.cross(selectNum1, selectNum2)
+            child1, child2 = ga2.cross(selectNum1, selectNum2)
             newPopulation2.extend(ga2.muration([child1, child2]))
             #当数量超过设定值，交换两个平行种群的解
             if len(newPopulation1) > populationCount:
@@ -121,12 +123,51 @@ def doubleGA(populationCount, crossRate, murationRate, iteraNum):
                     minDistance = distance2
                     bestFit = bestFit2
                     bestPath =copy.copy(bestPath2)
-                newPopulation1 = copy.copy(exPopulation1)
-                newPopulation2 = copy.copy(exPopulation2)
+                Population1 = copy.copy(exPopulation1)
+                Population2 = copy.copy(exPopulation2)
                 break
-        print itera, bestPath, minDistance, bestFit
+        print minItera, bestPath, minDistance, bestFit
     return minItera, bestPath, minDistance, bestFit
 
 if __name__ == '__main__':
-    for i in range(10):
-        minItera, finalPath, minDistance, fitness = doubleGA(50, 0.8, 0.1, 100)
+    """
+    count1 = 0
+    count2 = 0
+    for j in range(10):
+        minItera1, finalPath1, minDistance1, fitness1 = singleGA(35, 0.8, 0.05, 300)
+        minItera2, finalPath2, minDistance2, fitness2 = doubleGA(35, 0.8, 0.05, 0.9, 0.03, 300)
+        count1 = minDistance1 + count1
+        count2 = minDistance2 + count2
+        print j
+        print minItera1, finalPath1, minDistance1
+        print minItera2, finalPath2, minDistance2
+    print count1/10
+    print count2/10
+    minItera2, finalPath2, minDistance2, fitness2 = doubleGA(35, 0.9, 0.03, 0.9, 0.05, 1000, 'A-n64-k9.vrp')
+    print minItera2, minDistance2
+    """
+
+    count1 = 0
+    count2 = 0
+    count3 = 0
+    count4 = 0
+    num = 20
+    for j in range(num):
+        minItera1, finalPath1, minDistance1, fitness1 = singleGA(35, 0.9, 0.1, 3000, 'A-n33-k5.vrp')
+        minItera2, finalPath2, minDistance2, fitness2 = doubleGA(35, 0.9, 0.03, 0.9, 0.05, 3000, 'A-n33-k5.vrp')
+        count1 = minDistance1 + count1
+        count2 = minDistance2 + count2
+        count3 = minItera1 + count3
+        count4 = minItera2 + count4
+        print minItera1, minItera2
+        print minDistance1, minDistance2
+    print j
+    print count1/num
+    print count2/num
+    print count3/num
+    print count4/num
+
+    #minItera1, finalPath1, minDistance1, fitness1 = singleGA(35, 0.9, 0.1, 10, 'A-n64-k9.vrp')
+    #print minDistance1
+
+

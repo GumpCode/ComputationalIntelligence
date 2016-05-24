@@ -32,21 +32,21 @@ class CVRP(object):
             load = load + Requirement[gene[num]]
             if num == 0:
                 distance = distance + float(CustomerDistance[gene[num]][0])
-                finalPath.append(0)
+                finalPath.append(1)
             if num is not len(gene)-1:
                 if load > capacity:
                     load = Requirement[gene[num]]
                     distance = distance + float(CustomerDistance[0][gene[num-1]]) + float(CustomerDistance[0][gene[num]])
                     distance = distance - float(CustomerDistance[gene[num]][gene[num -1]])
                     distance = distance + float(CustomerDistance[gene[num]][gene[num +1]])
-                    finalPath.append(0)
-                    finalPath.append(0)
-                    finalPath.append(gene[num])
+                    finalPath.append(1)
+                    finalPath.append(1)
+                    finalPath.append(gene[num]+1)
                 else:
                     distance = distance + float(CustomerDistance[gene[num]][gene[num +1]])
-                    finalPath.append(gene[num])
+                    finalPath.append(gene[num]+1)
             elif num == len(gene)-1:
                     distance = distance + float(CustomerDistance[gene[num]][0])
-                    finalPath.append(gene[num])
-                    finalPath.append(0)
+                    finalPath.append(gene[num]+1)
+                    finalPath.append(1)
         return 1.0/distance, finalPath
